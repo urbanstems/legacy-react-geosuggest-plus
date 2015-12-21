@@ -32,7 +32,9 @@ const GeosuggestItem = React.createClass({
     return (// eslint-disable-line no-extra-parens
       <li className={this.getSuggestClasses()}
         onClick={this.onClick}>
-          {this.props.suggest.label}
+        <span className="icon icon-house"></span>
+        <strong>{this.props.suggest.firstname} {this.props.suggest.lastname}</strong><br />
+        {this.props.suggest.place_name} {this.props.suggest.address1} {this.props.suggest.address2}, {this.props.suggest.city}, {this.props.suggest.state_name}
       </li>
     );
   },
