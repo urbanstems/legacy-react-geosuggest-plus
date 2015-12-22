@@ -1,69 +1,34 @@
 /* global google */
-
+/* eslint react/jsx-sort-prop-types: 0, react/sort-comp: 0, react/prop-types: 0 */
 import React from 'react';
-import GeosuggestItem from './GeosuggestItem'; // eslint-disable-line
+import GeosuggestItem from './GeosuggestItem';
 
-const Geosuggest = React.createClass({
-  /**
-   * Get the default props
-   * @return {Object} The state
-   */
-  getDefaultProps: function() {
-    return {
-      fixtures: [],
-      initialValue: '',
-      placeholder: 'Search places',
-      disabled: false,
-      className: '',
-      location: null,
-      radius: null,
-      bounds: null,
-      country: null,
-      types: null,
-      googleMaps: null,
-      onSuggestSelect: () => {},
-      onFocus: () => {},
-      onBlur: () => {},
-      onChange: () => {},
-      skipSuggest: () => {},
-      getSuggestLabel: suggest => suggest.description,
-      autoActivateFirstSuggest: false
-    };
-  },
+class Geosuggest extends React.Component {
 
   /**
    * Get the initial state
-   * @return {Object} The state
+   * @param {Object} Props
    */
-  getInitialState: function() {
-    return {
+  constructor(props) {
+    super(props);
+    this.state = {
       isSuggestsHidden: true,
       userInput: this.props.initialValue,
       activeSuggest: null,
       suggests: []
     };
-  },
-
-  /**
-   * Change inputValue if prop changes
-   * @param {Object} props The new props
-   */
-  componentWillReceiveProps(props) {
-    if (this.props.initialValue !== props.initialValue) {
-      this.setState({userInput: props.initialValue});
-    }
-  },
+  }
 
   /**
    * Called on the client side after component is mounted.
    * Google api sdk object will be obtained and cached as a instance property.
    * Necessary objects of google api will also be determined and saved.
    */
-  componentDidMount: function() {
+  componentDidMount() {
     this.setInputValue(this.props.initialValue);
 
     var googleMaps = this.props.googleMaps
-      || (google && google.maps) || this.googleMaps;
+      || google && google.maps || this.googleMaps;
 
     if (!googleMaps) {
       console.error('Google map api was not found in the page.');
@@ -73,60 +38,70 @@ const Geosuggest = React.createClass({
 
     this.autocompleteService = new googleMaps.places.AutocompleteService();
     this.geocoder = new googleMaps.Geocoder();
-  },
+  }
+
+  /**
+   * Change inputValue if prop changes
+   * @param {Object} props The new props
+   */
+  componentWillReceiveProps(props) {
+    if (this.props.initialValue !== props.initialValue) {
+      this.setState({ userInput: props.initialValue });
+    }
+  }
 
   /**
    * Method used for setting initial value.
    * @param {string} value to set in input
    */
-  setInputValue: function(value) {
+  setInputValue(value) {
     this.setState({
       userInput: value
     });
-  },
+  }
 
   /**
    * When the input got changed
    */
-  onInputChange: function() {
+  onInputChange() {
     var userInput = this.refs.geosuggestInput.value;
 
-    this.setState({userInput: userInput}, function() {
+    this.setState({ userInput: userInput }, () => {
       this.showSuggests();
       this.props.onChange(userInput);
     }.bind(this));
-  },
+  }
 
   /**
    * When the input gets focused
    */
-  onFocus: function() {
+  onFocus() {
     this.props.onFocus();
     this.showSuggests();
-  },
+  }
 
   /**
    * Update the value of the user input
    * @param {String} value the new value of the user input
    */
-  update: function(value) {
-    this.setState({userInput: value});
+  update(value) {
+    this.setState({ userInput: value });
     this.props.onChange(value);
-  },
+  }
 
   /*
    * Clear the input and close the suggestion pane
    */
-  clear: function() {
-    this.setState({userInput: ''}, function() {
+  clear() {
+    this.setState({ userInput: '' }, () => {
       this.hideSuggests();
     }.bind(this));
-  },
+  }
 
   /**
    * Search for new suggests
    */
-  searchSuggests: function() {
+  searchSuggests() {
     if (!this.state.userInput) {
       this.updateSuggests();
       return;
@@ -168,13 +143,13 @@ const Geosuggest = React.createClass({
         }
       }.bind(this)
     );
-  },
+  }
 
   /**
    * Update the suggests
    * @param  {Object} suggestsGoogle The new google suggests
    */
-  updateSuggests: function(suggestsGoogle) {
+  updateSuggests(suggestsGoogle) {
     if (!suggestsGoogle) {
       suggestsGoogle = [];
     }
@@ -199,32 +174,32 @@ const Geosuggest = React.createClass({
       }
     });
 
-    this.setState({suggests: suggests});
-  },
+    this.setState({ suggests: suggests });
+  }
 
   /**
    * When the input gets focused
    */
-  showSuggests: function() {
+  showSuggests() {
     this.searchSuggests();
-    this.setState({isSuggestsHidden: false});
-  },
+    this.setState({ isSuggestsHidden: false });
+  }
 
   /**
    * When the input loses focused
    */
-  hideSuggests: function() {
+  hideSuggests() {
     this.props.onBlur();
     setTimeout(function() {
-      this.setState({isSuggestsHidden: true});
+      this.setState({ isSuggestsHidden: true });
     }.bind(this), 100);
-  },
+  }
 
   /**
    * When a key gets pressed in the input
    * @param  {Event} event The keypress event
    */
-  onInputKeyDown: function(event) {
+  onInputKeyDown(event) {
     switch (event.which) {
       case 40: // DOWN
         event.preventDefault();
@@ -247,13 +222,13 @@ const Geosuggest = React.createClass({
       default:
         break;
     }
-  },
+  }
 
   /**
    * Activate a new suggest
    * @param {String} direction The direction in which to activate new suggest
    */
-  activateSuggest: function(direction) {
+  activateSuggest(direction) { // eslint-disable-line
     if (this.state.isSuggestsHidden) {
       this.showSuggests();
       return;
@@ -279,14 +254,14 @@ const Geosuggest = React.createClass({
       newActiveSuggest = this.state.suggests[newIndex];
     }
 
-    this.setState({activeSuggest: newActiveSuggest});
-  },
+    this.setState({ activeSuggest: newActiveSuggest });
+  }
 
   /**
    * When an item got selected
    * @param {GeosuggestItem} suggest The selected suggest item
    */
-  selectSuggest: function(suggest) {
+  selectSuggest(suggest) {
     if (!suggest) {
       suggest = {
         label: this.state.userInput
@@ -304,16 +279,16 @@ const Geosuggest = React.createClass({
     }
 
     this.geocodeSuggest(suggest);
-  },
+  }
 
   /**
    * Geocode a suggest
    * @param  {Object} suggest The suggest
    */
-  geocodeSuggest: function(suggest) {
+  geocodeSuggest(suggest) {
     this.geocoder.geocode(
-      {address: suggest.label},
-      function(results, status) {
+      { address: suggest.label },
+      (results, status) => {
         if (status !== this.googleMaps.GeocoderStatus.OK) {
           return;
         }
@@ -330,14 +305,46 @@ const Geosuggest = React.createClass({
         this.props.onSuggestSelect(suggest);
       }.bind(this)
     );
-  },
+  }
+
+  /**
+   * Get the suggest items for the list
+   * @return {Array} The suggestions
+   */
+  getSuggestItems() {
+    return this.state.suggests.map(function(suggest) {
+      var isActive = this.state.activeSuggest &&
+        suggest.placeId === this.state.activeSuggest.placeId;
+
+      return (// eslint-disable-line no-extra-parens
+        <GeosuggestItem
+          key={suggest.placeId}
+          suggest={suggest}
+          isActive={isActive}
+          onSuggestSelect={this.selectSuggest} />
+      );
+    }.bind(this));
+  }
+
+  /**
+   * The classes for the suggests list
+   * @return {String} The classes
+   */
+  getSuggestsClasses() {
+    var classes = 'geosuggest__suggests';
+
+    classes += this.state.isSuggestsHidden ?
+      ' geosuggest__suggests--hidden' : '';
+
+    return classes;
+  }
 
   /**
    * Render the view
    * @return {Function} The React element to render
    */
-  render: function() {
-    return (// eslint-disable-line no-extra-parens
+  render() {
+    return (
       <div className={'geosuggest ' + this.props.className}
           onClick={this.onClick}>
         <input
@@ -356,39 +363,49 @@ const Geosuggest = React.createClass({
         </ul>
       </div>
     );
-  },
-
-  /**
-   * Get the suggest items for the list
-   * @return {Array} The suggestions
-   */
-  getSuggestItems: function() {
-    return this.state.suggests.map(function(suggest) {
-      var isActive = this.state.activeSuggest &&
-        suggest.placeId === this.state.activeSuggest.placeId;
-
-      return (// eslint-disable-line no-extra-parens
-        <GeosuggestItem
-          key={suggest.placeId}
-          suggest={suggest}
-          isActive={isActive}
-          onSuggestSelect={this.selectSuggest} />
-      );
-    }.bind(this));
-  },
-
-  /**
-   * The classes for the suggests list
-   * @return {String} The classes
-   */
-  getSuggestsClasses: function() {
-    var classes = 'geosuggest__suggests';
-
-    classes += this.state.isSuggestsHidden ?
-      ' geosuggest__suggests--hidden' : '';
-
-    return classes;
   }
-});
+}
 
-module.exports = Geosuggest;
+Geosuggest.propTypes = {
+  autoActivateFirstSuggest: React.PropTypes.boolean,
+  bounds: React.PropTypes.any,
+  className: React.PropTypes.string,
+  country: React.PropTypes.any,
+  disabled: React.PropTypes.boolean,
+  fixtures: React.PropTypes.array,
+  getSuggestLabel: React.PropTypes.func,
+  googleMaps: React.PropTypes.any,
+  initialValue: React.PropTypes.string,
+  location: React.PropTypes.any,
+  onBlur: React.PropTypes.func,
+  onChange: React.PropTypes.func,
+  onFocus: React.PropTypes.func,
+  onSuggestSelect: React.PropTypes.func,
+  placeholder: React.PropTypes.string,
+  radius: React.PropTypes.any,
+  skipSuggest: React.PropTypes.func,
+  types: React.PropTypes.any
+};
+
+Geosuggest.defaultProps = {
+  fixtures: [],
+  initialValue: '',
+  placeholder: 'Search places',
+  disabled: false,
+  className: '',
+  location: null,
+  radius: null,
+  bounds: null,
+  country: null,
+  types: null,
+  googleMaps: null,
+  onSuggestSelect: () => {},
+  onFocus: () => {},
+  onBlur: () => {},
+  onChange: () => {},
+  skipSuggest: () => {},
+  getSuggestLabel: suggest => suggest.description,
+  autoActivateFirstSuggest: false
+};
+
+export default Geosuggest;
