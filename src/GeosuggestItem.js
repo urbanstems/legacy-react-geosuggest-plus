@@ -4,7 +4,7 @@ import React from 'react';
 class GeosuggestItem extends React.Component {
 
   static propTypes = {
-    isActive: React.PropTypes.boolean,
+    isActive: React.PropTypes.bool,
     suggest: React.PropTypes.object,
     onSuggestSelect: React.PropTypes.func
   }
@@ -32,23 +32,34 @@ class GeosuggestItem extends React.Component {
     return classes;
   }
 
+  renderSaved() {
+    return (
+      <li className={this.getSuggestClasses()} onClick={::this.onClick}>
+        <span className="icon icon-house"></span>
+        <strong>{this.props.suggest.firstname}{'\u0020'}
+        {this.props.suggest.lastname}</strong><br />
+        {this.props.suggest.place_name}
+        {this.props.suggest.address1}{this.props.suggest.address2 ? ` ${this.props.suggest.address2}` : ''},{'\u0020'}
+        {this.props.suggest.city}, {this.props.suggest.state_name}
+      </li>
+    );
+  }
+
+  renderGoogle() {
+    return (
+      <li className={this.getSuggestClasses()} onClick={::this.onClick}>
+        {this.props.suggest.label}
+      </li>
+    );
+  }
   /**
    * Render the view
    * @return {Function} The React element to render
    */
   render() {
-    return (
-      <li className={this.getSuggestClasses()}
-        onClick={this.onClick}>
-        <span className="icon icon-house"></span>
-        <strong>{this.props.suggest.firstname}
-        {this.props.suggest.lastname}</strong><br />
-        {this.props.suggest.place_name}
-        {this.props.suggest.address1} {this.props.suggest.address2},
-        {this.props.suggest.city}, {this.props.suggest.state_name}
-      </li>
-    );
+    return this.props.suggest.label ? this.renderGoogle() : this.renderSaved();
   }
+
 }
 
 GeosuggestItem.defaultProps = {

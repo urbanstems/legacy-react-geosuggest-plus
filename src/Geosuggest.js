@@ -15,7 +15,8 @@ class Geosuggest extends React.Component {
       isSuggestsHidden: true,
       userInput: this.props.initialValue,
       activeSuggest: null,
-      suggests: []
+      suggests: [], // google predictions
+      recents: [] // recent/saved addresses
     };
   }
 
@@ -69,7 +70,7 @@ class Geosuggest extends React.Component {
     this.setState({ userInput: userInput }, () => {
       this.showSuggests();
       this.props.onChange(userInput);
-    }.bind(this));
+    });
   }
 
   /**
@@ -95,7 +96,7 @@ class Geosuggest extends React.Component {
   clear() {
     this.setState({ userInput: '' }, () => {
       this.hideSuggests();
-    }.bind(this));
+    });
   }
 
   /**
@@ -135,13 +136,14 @@ class Geosuggest extends React.Component {
 
     this.autocompleteService.getPlacePredictions(
       options,
-      function(suggestsGoogle) {
+      (suggestsGoogle) => {
+        console.log('++++++', suggestsGoogle);
         this.updateSuggests(suggestsGoogle);
 
         if (this.props.autoActivateFirstSuggest) {
           this.activateSuggest('next');
         }
-      }.bind(this)
+      }
     );
   }
 
@@ -154,20 +156,23 @@ class Geosuggest extends React.Component {
       suggestsGoogle = [];
     }
 
-    var suggests = [],
-      regex = new RegExp(this.state.userInput, 'gim'),
-      skipSuggest = this.props.skipSuggest;
+    let suggests = [];
+    let recents = [];
+    const regex = new RegExp(this.state.userInput, 'gim');
+    const skipSuggest = this.props.skipSuggest;
 
-    this.props.fixtures.forEach(function(suggest) {
-      if (!skipSuggest(suggest) && suggest.label.match(regex)) {
-        suggest.placeId = suggest.label;
-        suggests.push(suggest);
+    // recent/saved
+    this.props.fixtures.forEach(recent => {
+      if (!skipSuggest(recent)) {
+        recent.placeId = recent.id;
+        recent.altLabel = this.props.getRecentLabel(recent);
+        recents.push(recent);
       }
     });
 
     suggestsGoogle.forEach(suggest => {
       if (!skipSuggest(suggest)) {
-        suggests.push({
+        suggests.unshift({
           label: this.props.getSuggestLabel(suggest),
           placeId: suggest.place_id
         });
@@ -175,6 +180,7 @@ class Geosuggest extends React.Component {
     });
 
     this.setState({ suggests: suggests });
+    this.setState({ recents: recents });
   }
 
   /**
@@ -190,9 +196,9 @@ class Geosuggest extends React.Component {
    */
   hideSuggests() {
     this.props.onBlur();
-    setTimeout(function() {
+    setTimeout(() => {
       this.setState({ isSuggestsHidden: true });
-    }.bind(this), 100);
+    }, 100);
   }
 
   /**
@@ -270,7 +276,7 @@ class Geosuggest extends React.Component {
 
     this.setState({
       isSuggestsHidden: true,
-      userInput: suggest.label
+      userInput: suggest.label || suggest.altLabel
     });
 
     if (suggest.location) {
@@ -287,7 +293,7 @@ class Geosuggest extends React.Component {
    */
   geocodeSuggest(suggest) {
     this.geocoder.geocode(
-      { address: suggest.label },
+      { address: suggest.label || suggest.altLabel },
       (results, status) => {
         if (status !== this.googleMaps.GeocoderStatus.OK) {
           return;
@@ -303,8 +309,32 @@ class Geosuggest extends React.Component {
         };
 
         this.props.onSuggestSelect(suggest);
-      }.bind(this)
+      }
     );
+  }
+
+  /**
+   * Get the recent/saved items for the list
+   * @return {Array} The recent/saved items
+   */
+  getRecentItems() {
+    return this.state.recents.map((suggest, index) => {
+      var isActive = this.state.activeSuggest &&
+        suggest.placeId === this.state.activeSuggest.placeId;
+        
+      // shut off at 5
+      if (index > 4) {
+        return;
+      }
+
+      return (// eslint-disable-line no-extra-parens
+        <GeosuggestItem
+          key={suggest.placeId}
+          suggest={suggest}
+          isActive={isActive}
+          onSuggestSelect={::this.selectSuggest} />
+      );
+    });
   }
 
   /**
@@ -312,7 +342,7 @@ class Geosuggest extends React.Component {
    * @return {Array} The suggestions
    */
   getSuggestItems() {
-    return this.state.suggests.map(function(suggest) {
+    return this.state.suggests.map((suggest, index) => {
       var isActive = this.state.activeSuggest &&
         suggest.placeId === this.state.activeSuggest.placeId;
 
@@ -321,9 +351,9 @@ class Geosuggest extends React.Component {
           key={suggest.placeId}
           suggest={suggest}
           isActive={isActive}
-          onSuggestSelect={this.selectSuggest} />
+          onSuggestSelect={::this.selectSuggest} />
       );
-    }.bind(this));
+    });
   }
 
   /**
@@ -339,14 +369,22 @@ class Geosuggest extends React.Component {
     return classes;
   }
 
+  getContainerClasses() {
+    var classes = 'geosuggest-container row';
+
+    classes += this.state.isSuggestsHidden ?
+      ' geosuggest__suggests--hidden hidden' : '';
+
+    return classes;
+  }
+
   /**
    * Render the view
    * @return {Function} The React element to render
    */
   render() {
     return (
-      <div className={'geosuggest ' + this.props.className}
-          onClick={this.onClick}>
+      <div className={'geosuggest ' + this.props.className}>
         <input
           className="geosuggest__input"
           ref="geosuggestInput"
@@ -354,25 +392,34 @@ class Geosuggest extends React.Component {
           value={this.state.userInput}
           placeholder={this.props.placeholder}
           disabled={this.props.disabled}
-          onKeyDown={this.onInputKeyDown}
-          onChange={this.onInputChange}
-          onFocus={this.onFocus}
-          onBlur={this.hideSuggests} />
-        <ul className={this.getSuggestsClasses()}>
-          {this.getSuggestItems()}
-        </ul>
+          onKeyDown={::this.onInputKeyDown}
+          onChange={::this.onInputChange}
+          onFocus={::this.onFocus}
+          onBlur={::this.hideSuggests} />
+
+        <div className={this.getContainerClasses()}>
+          <span className="geosuggest-label allcaps">Suggestions</span>
+          <ul className="geosuggest__suggests">
+            {this.getSuggestItems()}
+          </ul>
+          <span className="geosuggest-label allcaps">Recent Addresses</span>
+          <ul className="geosuggest__recents">
+            {this.getRecentItems()}
+          </ul>
+        </div>
       </div>
     );
   }
 }
 
 Geosuggest.propTypes = {
-  autoActivateFirstSuggest: React.PropTypes.boolean,
+  autoActivateFirstSuggest: React.PropTypes.bool,
   bounds: React.PropTypes.any,
   className: React.PropTypes.string,
   country: React.PropTypes.any,
-  disabled: React.PropTypes.boolean,
+  disabled: React.PropTypes.bool,
   fixtures: React.PropTypes.array,
+  getRecentLabel: React.PropTypes.func,
   getSuggestLabel: React.PropTypes.func,
   googleMaps: React.PropTypes.any,
   initialValue: React.PropTypes.string,
@@ -404,6 +451,7 @@ Geosuggest.defaultProps = {
   onBlur: () => {},
   onChange: () => {},
   skipSuggest: () => {},
+  getRecentLabel: recent => recent.zipcode,
   getSuggestLabel: suggest => suggest.description,
   autoActivateFirstSuggest: false
 };
