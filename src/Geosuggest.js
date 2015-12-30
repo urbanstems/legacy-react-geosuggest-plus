@@ -370,7 +370,7 @@ class Geosuggest extends React.Component {
   }
 
   getContainerClasses() {
-    var classes = 'geosuggest-container row';
+    var classes = 'geosuggest-window row';
 
     classes += this.state.isSuggestsHidden ?
       ' geosuggest__suggests--hidden hidden' : '';
@@ -384,7 +384,7 @@ class Geosuggest extends React.Component {
    */
   render() {
     return (
-      <div className={'geosuggest ' + this.props.className}>
+      <div className={'geosuggest-container ' + this.props.className}>
         <input
           className="geosuggest__input"
           ref="geosuggestInput"

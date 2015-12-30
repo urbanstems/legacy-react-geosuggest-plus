@@ -31,7 +31,8 @@
     "react": "React"
   },
   "scripts": {
-    "prepublish": "make build"
+    "prepublish": "make build",
+    "postinstall": "make build"
   },
   "readmeFilename": "README.md",
   "keywords": [
