@@ -1,5 +1,5 @@
 {
-  "name": "react-geosuggest",
+  "name": "react-geosuggest-plus",
   "version": "1.13.3",
   "description": "A React autosuggest for the Google Maps Places API.",
   "main": "./dist/Geosuggest",
@@ -31,8 +31,7 @@
     "react": "React"
   },
   "scripts": {
-    "prepublish": "make build",
-    "postinstall": "make build"
+    "prepublish": "make build"
   },
   "readmeFilename": "README.md",
   "keywords": [
