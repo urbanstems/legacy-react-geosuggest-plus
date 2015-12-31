@@ -81,6 +81,10 @@ class Geosuggest extends React.Component {
     this.showSuggests();
   }
 
+  onClick() {
+    this.props.onClick();
+  }
+
   /**
    * Update the value of the user input
    * @param {String} value the new value of the user input
@@ -395,6 +399,7 @@ class Geosuggest extends React.Component {
           onKeyDown={::this.onInputKeyDown}
           onChange={::this.onInputChange}
           onFocus={::this.onFocus}
+          onClick={::this.onClick}
           onBlur={::this.hideSuggests} />
 
         <div className={this.getContainerClasses()}>
@@ -427,6 +432,7 @@ Geosuggest.propTypes = {
   onBlur: React.PropTypes.func,
   onChange: React.PropTypes.func,
   onFocus: React.PropTypes.func,
+  onClick: React.PropTypes.func,
   onSuggestSelect: React.PropTypes.func,
   placeholder: React.PropTypes.string,
   radius: React.PropTypes.any,
@@ -449,6 +455,7 @@ Geosuggest.defaultProps = {
   onSuggestSelect: () => {},
   onFocus: () => {},
   onBlur: () => {},
+  onClick: () => {},
   onChange: () => {},
   skipSuggest: () => {},
   getRecentLabel: recent => recent.zipcode,
