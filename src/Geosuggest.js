@@ -39,6 +39,7 @@ class Geosuggest extends React.Component {
 
     this.autocompleteService = new googleMaps.places.AutocompleteService();
     this.geocoder = new googleMaps.Geocoder();
+    this._isMounted = true;
   }
 
   /**
@@ -49,6 +50,10 @@ class Geosuggest extends React.Component {
     if (this.props.initialValue !== props.initialValue) {
       this.setState({ userInput: props.initialValue });
     }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   /**
@@ -201,7 +206,9 @@ class Geosuggest extends React.Component {
   hideSuggests() {
     this.props.onBlur();
     setTimeout(() => {
-      this.setState({ isSuggestsHidden: true });
+      if (this._isMounted) {
+        this.setState({ isSuggestsHidden: true });
+      }
     }, 100);
   }
 
