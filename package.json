@@ -1,6 +1,6 @@
 {
   "name": "react-geosuggest-plus",
-  "version": "1.13.4",
+  "version": "1.13.5",
   "description": "A React autosuggest for the Google Maps Places API.",
   "main": "./dist/Geosuggest",
   "author": "Robert Katzki <katzki@ubilabs.net>",
