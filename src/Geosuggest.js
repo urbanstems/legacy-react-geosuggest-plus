@@ -7,17 +7,13 @@ class Geosuggest extends React.Component {
 
   /**
    * Get the initial state
-   * @param {Object} Props
    */
-  constructor(props) {
-    super(props);
-    this.state = {
-      isSuggestsHidden: true,
-      userInput: this.props.initialValue,
-      activeSuggest: null,
-      suggests: [], // google predictions
-      recents: [] // recent/saved addresses
-    };
+  state = {
+    isSuggestsHidden: true,
+    userInput: this.props.initialValue,
+    activeSuggest: null,
+    suggests: [], // google predictions
+    recents: [] // recent/saved addresses
   }
 
   /**
@@ -394,6 +390,29 @@ class Geosuggest extends React.Component {
    * @return {Function} The React element to render
    */
   render() {
+    let suggestionsSection;
+    let recentsSection;
+    if (this.state.suggests) {
+      suggestionsSection = (() => (
+        <div className="geosuggest-suggestions">
+          <span className="geosuggest-label allcaps">Suggestions</span>
+          <ul className="geosuggest__suggests">
+            {this.getSuggestItems()}
+          </ul>
+        </div>
+      ))();
+    }
+
+    if (this.state.recents) {
+      recentsSection = (() => (
+        <div className="geosuggest-recents">
+          <span className="geosuggest-label allcaps">Recent Addresses</span>
+          <ul className="geosuggest__recents">
+            {this.getRecentItems()}
+          </ul>
+        </div>
+      ))();
+    }
     return (
       <div className={'geosuggest-container ' + this.props.className}>
         <input
@@ -410,14 +429,8 @@ class Geosuggest extends React.Component {
           onBlur={::this.hideSuggests} />
 
         <div className={this.getContainerClasses()}>
-          <span className="geosuggest-label allcaps">Suggestions</span>
-          <ul className="geosuggest__suggests">
-            {this.getSuggestItems()}
-          </ul>
-          <span className="geosuggest-label allcaps">Recent Addresses</span>
-          <ul className="geosuggest__recents">
-            {this.getRecentItems()}
-          </ul>
+          {suggestionsSection}
+          {recentsSection}
         </div>
       </div>
     );
