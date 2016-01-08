@@ -4,14 +4,14 @@
   "description": "A React autosuggest for the Google Maps Places API.",
   "main": "./dist/Geosuggest",
   "author": "Robert Katzki <katzki@ubilabs.net>",
-  "homepage": "https://github.com/urbanstems/react-geosuggest",
+  "homepage": "https://github.com/urbanstems/react-geosuggest-plus",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/urbanstems/react-geosuggest.git"
+    "url": "https://github.com/urbanstems/react-geosuggest-plus.git"
   },
   "bugs": {
-    "url": "https://github.com/urbanstems/react-geosuggest/issues"
+    "url": "https://github.com/urbanstems/react-geosuggest-plus/issues"
   },
   "peerDependencies": {
     "react": "0.14.0"
