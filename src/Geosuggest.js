@@ -247,14 +247,16 @@ class Geosuggest extends React.Component {
       return;
     }
 
-    var suggestsCount = this.state.suggests.length - 1,
+    var suggestsLength = this.state.suggests.length;
+    var recentsLength = this.state.recents.length;
+    var suggestsCount = recentsLength + suggestsLength - 1,
       next = direction === 'next',
       newActiveSuggest = null,
       newIndex = 0,
       i = 0; // eslint-disable-line id-length
 
     for (i; i <= suggestsCount; i++) {
-      if (this.state.suggests[i] === this.state.activeSuggest) {
+      if (this.state.suggests[i] === this.state.activeSuggest || this.state.recents[i] === this.state.activeSuggest) {
         newIndex = next ? i + 1 : i - 1;
       }
     }
@@ -264,7 +266,14 @@ class Geosuggest extends React.Component {
     }
 
     if (newIndex >= 0 && newIndex <= suggestsCount) {
-      newActiveSuggest = this.state.suggests[newIndex];
+      // if suggests not full but recents is
+      if (!suggestsLength && recentsLength) {
+        newActiveSuggest = this.state.recents[newIndex];
+      } else if (suggestsLength && recentsLength && newIndex >= suggestsLength) {
+        newActiveSuggest = this.state.recents[newIndex];
+      } else {
+        newActiveSuggest = this.state.suggests[newIndex];
+      }
     }
 
     this.setState({ activeSuggest: newActiveSuggest });
