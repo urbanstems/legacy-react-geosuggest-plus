@@ -167,17 +167,30 @@ class Geosuggest extends React.Component {
     const skipSuggest = this.props.skipSuggest;
 
     // recent/saved
-    this.props.fixtures.forEach(recent => {
-      if (!skipSuggest(recent)) {
-        recent.placeId = recent.id;
-        recent.altLabel = this.props.getRecentLabel(recent);
-        recents.push(recent);
-      }
-    });
+    // recents = this.props.fixtures.map((recent, index) => {
+    //   if (!skipSuggest(recent) && index < this.props.recentsLimit) {
+    //     recent.placeId = recent.id;
+    //     recent.altLabel = this.props.getRecentLabel(recent);
+    //     console.log('inside', recent);
+    //     return recent;
+    //   }
+    // });
+
+    let index = 0;
+    let fixturesLen = this.props.fixtures.length;
+    let limit = fixturesLen > this.props.recentsLimit ? this.props.recentsLimit : fixturesLen;
+    for (; index < fixturesLen; index++) {
+      let recent = this.props.fixtures[index];
+      recent.placeId = recent.id;
+      recent.altLabel = this.props.getRecentLabel(recent);
+      recents.push(recent);
+    }
+
+    console.log('recents', recents);
 
     suggestsGoogle.forEach(suggest => {
       if (!skipSuggest(suggest)) {
-        suggests.unshift({
+        suggests.push({
           label: this.props.getSuggestLabel(suggest),
           placeId: suggest.place_id
         });
@@ -249,7 +262,8 @@ class Geosuggest extends React.Component {
 
     var suggestsLength = this.state.suggests.length;
     var recentsLength = this.state.recents.length;
-    var suggestsCount = recentsLength + suggestsLength - 1,
+    var recentsCount = recentsLength > this.props.recentsLimit ? this.props.recentsLimit : recentsLength;
+    var suggestsCount = recentsCount + suggestsLength - 1,
       next = direction === 'next',
       newActiveSuggest = null,
       newIndex = 0,
@@ -267,14 +281,16 @@ class Geosuggest extends React.Component {
 
     if (newIndex >= 0 && newIndex <= suggestsCount) {
       // if suggests not full but recents is
-      if (!suggestsLength && recentsLength) {
+      if (!suggestsLength && recentsCount) {
         newActiveSuggest = this.state.recents[newIndex];
-      } else if (suggestsLength && recentsLength && newIndex >= suggestsLength) {
+      } else if (suggestsLength && recentsCount && newIndex >= suggestsLength) {
         newActiveSuggest = this.state.recents[newIndex];
       } else {
         newActiveSuggest = this.state.suggests[newIndex];
       }
     }
+
+    console.log('newsuggest', newActiveSuggest, newIndex);
 
     this.setState({ activeSuggest: newActiveSuggest });
   }
@@ -337,9 +353,12 @@ class Geosuggest extends React.Component {
     return this.state.recents.map((suggest, index) => {
       var isActive = this.state.activeSuggest &&
         suggest.placeId === this.state.activeSuggest.placeId;
-        
-      // shut off at 5
-      if (index > 4) {
+
+      if (this.state.activeSuggest) {
+        console.log(suggest.placeId, this.state.activeSuggest.placeId);
+      }
+      // shut off at the recentsLimit
+      if (index >= this.props.recentsLimit) {
         return;
       }
 
@@ -466,7 +485,8 @@ Geosuggest.propTypes = {
   placeholder: React.PropTypes.string,
   radius: React.PropTypes.any,
   skipSuggest: React.PropTypes.func,
-  types: React.PropTypes.any
+  types: React.PropTypes.any,
+  recentsLimit: React.PropTypes.any
 };
 
 Geosuggest.defaultProps = {
@@ -489,7 +509,8 @@ Geosuggest.defaultProps = {
   skipSuggest: () => {},
   getRecentLabel: recent => recent.zipcode,
   getSuggestLabel: suggest => suggest.description,
-  autoActivateFirstSuggest: false
+  autoActivateFirstSuggest: false,
+  recentsLimit: 5
 };
 
 export default Geosuggest;
