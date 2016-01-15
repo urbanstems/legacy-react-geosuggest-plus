@@ -179,14 +179,14 @@ class Geosuggest extends React.Component {
     let index = 0;
     let fixturesLen = this.props.fixtures.length;
     let limit = fixturesLen > this.props.recentsLimit ? this.props.recentsLimit : fixturesLen;
+    // ugh i hate for-loops but seems like i have to
+    // utilize it here so i can break out
     for (; index < fixturesLen; index++) {
       let recent = this.props.fixtures[index];
       recent.placeId = recent.id;
       recent.altLabel = this.props.getRecentLabel(recent);
       recents.push(recent);
     }
-
-    console.log('recents', recents);
 
     suggestsGoogle.forEach(suggest => {
       if (!skipSuggest(suggest)) {
@@ -290,8 +290,6 @@ class Geosuggest extends React.Component {
       }
     }
 
-    console.log('newsuggest', newActiveSuggest, newIndex);
-
     this.setState({ activeSuggest: newActiveSuggest });
   }
 
@@ -354,9 +352,6 @@ class Geosuggest extends React.Component {
       var isActive = this.state.activeSuggest &&
         suggest.placeId === this.state.activeSuggest.placeId;
 
-      if (this.state.activeSuggest) {
-        console.log(suggest.placeId, this.state.activeSuggest.placeId);
-      }
       // shut off at the recentsLimit
       if (index >= this.props.recentsLimit) {
         return;
