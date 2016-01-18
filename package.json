@@ -14,7 +14,7 @@
     "url": "https://github.com/urbanstems/react-geosuggest-plus/issues"
   },
   "peerDependencies": {
-    "react": "0.14.0"
+    "react": ">= 0.14.0"
   },
   "devDependencies": {
     "babel": "^5.8.23",
