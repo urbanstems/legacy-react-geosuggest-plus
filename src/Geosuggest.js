@@ -142,7 +142,7 @@ class Geosuggest extends React.Component {
     this.autocompleteService.getPlacePredictions(
       options,
       (suggestsGoogle) => {
-        console.log('++++++', suggestsGoogle);
+        // console.log('++++++', suggestsGoogle);
         this.updateSuggests(suggestsGoogle);
 
         if (this.props.autoActivateFirstSuggest) {
@@ -322,8 +322,18 @@ class Geosuggest extends React.Component {
    * @param  {Object} suggest The suggest
    */
   geocodeSuggest(suggest) {
+    let searchObject;
+    if (suggest.altLabel) {
+      searchObject = {
+        address: suggest.altLabel
+      };
+    } else if (suggest.placeId) {
+      searchObject = {
+        placeId: suggest.placeId
+      };
+    }
     this.geocoder.geocode(
-      { address: suggest.label || suggest.altLabel },
+      searchObject,
       (results, status) => {
         if (status !== this.googleMaps.GeocoderStatus.OK) {
           return;
