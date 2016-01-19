@@ -14,7 +14,6 @@ class GeosuggestItem extends React.Component {
    * @param  {Event} event The click event
    */
   onClick(event) {
-    console.log('onclick', event);
     event.preventDefault();
     this.props.onSuggestSelect(this.props.suggest);
   }
