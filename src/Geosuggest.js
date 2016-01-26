@@ -87,6 +87,14 @@ class Geosuggest extends React.Component {
   }
 
   /**
+   * Click the clear button
+   */
+  onClearClick() {
+    this.clear();
+    this.props.onClearClick();
+  }
+
+  /**
    * Update the value of the user input
    * @param {String} value the new value of the user input
    */
@@ -99,7 +107,9 @@ class Geosuggest extends React.Component {
    * Clear the input and close the suggestion pane
    */
   clear() {
-    this.setState({ userInput: '' }, () => {
+    this.setState({
+      userInput: ''
+    }, () => {
       this.hideSuggests();
     });
   }
@@ -142,7 +152,6 @@ class Geosuggest extends React.Component {
     this.autocompleteService.getPlacePredictions(
       options,
       (suggestsGoogle) => {
-        // console.log('++++++', suggestsGoogle);
         this.updateSuggests(suggestsGoogle);
 
         if (this.props.autoActivateFirstSuggest) {
@@ -165,16 +174,6 @@ class Geosuggest extends React.Component {
     let recents = [];
     const regex = new RegExp(this.state.userInput, 'gim');
     const skipSuggest = this.props.skipSuggest;
-
-    // recent/saved
-    // recents = this.props.fixtures.map((recent, index) => {
-    //   if (!skipSuggest(recent) && index < this.props.recentsLimit) {
-    //     recent.placeId = recent.id;
-    //     recent.altLabel = this.props.getRecentLabel(recent);
-    //     console.log('inside', recent);
-    //     return recent;
-    //   }
-    // });
 
     let index = 0;
     let fixturesLen = this.props.fixtures.length;
@@ -460,7 +459,9 @@ class Geosuggest extends React.Component {
           onFocus={::this.onFocus}
           onClick={::this.onClick}
           onBlur={::this.hideSuggests} />
-
+        {!!this.state.userInput &&
+          <button className="icon icon-close geosuggest-clear" onClick={::this.onClearClick}></button>
+        }
         <div className={this.getContainerClasses()}>
           {suggestionsSection()}
           {recentsSection()}
@@ -484,6 +485,7 @@ Geosuggest.propTypes = {
   location: React.PropTypes.any,
   onBlur: React.PropTypes.func,
   onChange: React.PropTypes.func,
+  onClearClick: React.PropTypes.func,
   onFocus: React.PropTypes.func,
   onClick: React.PropTypes.func,
   onSuggestSelect: React.PropTypes.func,
@@ -511,6 +513,7 @@ Geosuggest.defaultProps = {
   onBlur: () => {},
   onClick: () => {},
   onChange: () => {},
+  onClearClick: () => {},
   skipSuggest: () => {},
   getRecentLabel: recent => recent.zipcode,
   getSuggestLabel: suggest => suggest.description,
