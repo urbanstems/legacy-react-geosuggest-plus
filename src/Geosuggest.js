@@ -90,7 +90,7 @@ class Geosuggest extends React.Component {
    * Click the clear button
    */
   onClearClick() {
-    this.clear();
+    this.clear(() => this.refs.geosuggestInput.focus());
     this.props.onClearClick();
   }
 
@@ -105,13 +105,13 @@ class Geosuggest extends React.Component {
 
   /*
    * Clear the input and close the suggestion pane
+   * () => this.hideSuggests()
+   *
    */
-  clear() {
+  clear(cb = () => {}) {
     this.setState({
       userInput: ''
-    }, () => {
-      this.hideSuggests();
-    });
+    }, cb);
   }
 
   /**

@@ -1,6 +1,6 @@
 # React Geosuggest [![Build Status](https://travis-ci.org/ubilabs/react-geosuggest.svg?branch=master)](https://travis-ci.org/ubilabs/react-geosuggest)
 
-A [React](http://facebook.github.io/react/) autosuggest for the Google Maps Places API. You can also define your own suggests as defaults.
+A [React](http://facebook.github.io/react/) autosuggest for the Google Maps Places API. You can also define your own suggests as defaults which continue to appear even during active input. Originally forked from [ubilabs-react-geosuggest](https://github.com/ubilabs/react-geosuggest).
 
 
 ## Demo
@@ -28,10 +28,8 @@ As this component uses the Google Maps Places API to get suggests, you must incl
 
 The easiest way to use geosuggest is to install it from NPM and include it in your own React build process (using [Browserify](http://browserify.org), [Webpack](http://webpack.github.io/), etc).
 
-You can also use the standalone build by including `dist/react-geosuggest.js` in your page. If you use this, make sure you have already included React, and it is available as a global variable.
-
 ```
-npm install react-geosuggest --save
+npm install react-geosuggest-plus --save
 ```
 
 
@@ -40,7 +38,7 @@ npm install react-geosuggest --save
 The Geosuggest works out of the box by just including it. However, you can customize the behaviour with the properties noted below.
 
 ```
-var Geosuggest = require('react-geosuggest');
+var Geosuggest = require('react-geosuggest-plus');
 
 <Geosuggest />
 ```
