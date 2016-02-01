@@ -13,7 +13,8 @@ class GeosuggestItem extends React.Component {
    * When the element gets clicked
    * @param  {Event} event The click event
    */
-  onClick(event) {
+  handleClick(event) {
+    console.log(event);
     event.preventDefault();
     this.props.onSuggestSelect(this.props.suggest);
   }
@@ -34,7 +35,7 @@ class GeosuggestItem extends React.Component {
 
   renderSaved() {
     return (
-      <li className={this.getSuggestClasses()} onClick={::this.onClick}>
+      <li className={this.getSuggestClasses()} onClick={::this.handleClick}>
         <span className="icon icon-house"></span>
         <strong>{this.props.suggest.firstname}{'\u0020'}
         {this.props.suggest.lastname}</strong><br />
@@ -47,7 +48,7 @@ class GeosuggestItem extends React.Component {
 
   renderGoogle() {
     return (
-      <li className={this.getSuggestClasses()} onClick={::this.onClick}>
+      <li className={this.getSuggestClasses()} onClick={::this.handleClick}>
         {this.props.suggest.label}
       </li>
     );

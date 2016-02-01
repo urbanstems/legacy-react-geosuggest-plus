@@ -217,7 +217,7 @@ class Geosuggest extends React.Component {
       if (this._isMounted) {
         this.setState({ isSuggestsHidden: true });
       }
-    }, 100);
+    }, 500);
   }
 
   /**
