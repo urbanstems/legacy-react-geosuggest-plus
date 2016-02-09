@@ -236,7 +236,23 @@ class Geosuggest extends React.Component {
         break;
       case 13: // ENTER
         event.preventDefault();
-        this.selectSuggest(this.state.activeSuggest);
+        // If activeSuggest is populated
+        // then proceed as expected
+        if (this.state.activeSuggest) {
+          this.selectSuggest(this.state.activeSuggest);
+        }
+        // If the user has inputted text
+        // AND there are suggestions,
+        // we'll default to the first suggestion
+        else if (this.state.userInput && this.state.suggests.length) {
+          this.selectSuggest(this.state.suggests[0]);
+        }
+        // Cascades down to just checking
+        // if the user has entered text
+        // We'll just defer to component `onEmptySuggests`
+        else if (this.state.userInput) {
+          this.props.onEmptySuggests();
+        }
         break;
       case 9: // TAB
         this.selectSuggest(this.state.activeSuggest);
@@ -433,6 +449,8 @@ class Geosuggest extends React.Component {
           </ul>
         </div>
       );
+    } else if (this.state.userInput) {
+      suggestionsSection = this.props.noSuggestionsMarkup;
     }
 
     if (!!this.state.recents.length) {
@@ -466,6 +484,7 @@ class Geosuggest extends React.Component {
           {suggestionsSection()}
           {recentsSection()}
         </div>
+        {this.props.showButton && this.props.buttonMarkup()}
       </div>
     );
   }
@@ -493,7 +512,9 @@ Geosuggest.propTypes = {
   radius: React.PropTypes.any,
   skipSuggest: React.PropTypes.func,
   types: React.PropTypes.any,
-  recentsLimit: React.PropTypes.any
+  recentsLimit: React.PropTypes.any,
+  showButton: React.PropTypes.bool,
+  buttonMarkup: React.PropTypes.func
 };
 
 Geosuggest.defaultProps = {
@@ -518,7 +539,11 @@ Geosuggest.defaultProps = {
   getRecentLabel: recent => recent.zipcode,
   getSuggestLabel: suggest => suggest.description,
   autoActivateFirstSuggest: false,
-  recentsLimit: 5
+  recentsLimit: 5,
+  showButton: false,
+  buttonMarkup: () => (<button>Enter</button>),
+  noSuggestionsMarkup: () => {},
+  onEmptySuggests: () => {}
 };
 
 export default Geosuggest;
