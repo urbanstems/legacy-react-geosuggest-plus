@@ -9,6 +9,27 @@ import RecentListItem from '../../src/components/RecentsListItem';
 import createRecentsList from '../fixtures/recents';
 
 describe('<Geosuggest />', function () {
+  describe('General functionality', function () {
+    let wrapper;
+
+    beforeEach(() => {
+      wrapper = mount(<Geosuggest />);
+    });
+
+    afterEach(() => {
+      wrapper = null;
+    });
+
+    it('should hide the suggestions initially', function () {
+      expect(wrapper.state().isSuggestsHidden).to.be.true;
+    });
+
+    it('should show the suggestions once the input is focused', function () {
+      wrapper.find('input').simulate('focus');
+      expect(wrapper.state().isSuggestsHidden).to.be.false;
+    });
+  });
+
   describe('Rendering fixtures', function () {
     let wrapper;
     let props = {
