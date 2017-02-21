@@ -43,6 +43,7 @@
     "lint": "eslint src",
     "pretest": "npm run lint",
     "test": "mocha",
+    "test:watch": "npm run test -- --reporter min --watch",
     "prepublish": "make build",
     "postversion": "git push && git push --tags"
   },
