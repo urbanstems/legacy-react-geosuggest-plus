@@ -25,6 +25,7 @@
     "babel-preset-stage-0": "^6.22.0",
     "babel-register": "^6.23.0",
     "chai": "^3.5.0",
+    "conventional-changelog-generator": "0.0.3",
     "enzyme": "^2.7.1",
     "eslint": "^3.16.0",
     "eslint-config-airbnb": "^14.1.0",
@@ -39,6 +40,8 @@
     "react": "React"
   },
   "scripts": {
+    "lint": "eslint src",
+    "pretest": "npm run lint",
     "test": "mocha",
     "prepublish": "make build",
     "postversion": "git push && git push --tags"
