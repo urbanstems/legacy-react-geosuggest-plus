@@ -15,7 +15,6 @@ describe('<Geosuggest />', function () {
       recentsLimit: 3,
       fixtures: createRecentsList(),
     };
-    let fixturesLimit = 3;
 
     beforeEach(() => {
       wrapper = mount(<Geosuggest {...props} />);
