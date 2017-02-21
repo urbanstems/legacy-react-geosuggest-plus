@@ -1,21 +1,11 @@
-/* eslint react/jsx-sort-prop-types: 0, react/sort-comp: 0, react/prop-types: 0 */
-import React from 'react';
+import React from 'react'; // eslint-disable-line
 
 class GeosuggestItem extends React.Component {
+  constructor(...args) {
+    super(...args);
 
-  static propTypes = {
-    isActive: React.PropTypes.bool,
-    suggest: React.PropTypes.object,
-    onSuggestSelect: React.PropTypes.func
-  }
-
-  /**
-   * When the element gets clicked
-   * @param  {Event} event The click event
-   */
-  handleClick(event) {
-    event.preventDefault();
-    this.props.onSuggestSelect(this.props.suggest);
+    this.handleClick = this.handleClick.bind(this);
+    this.getSuggestClasses = this.getSuggestClasses.bind(this);
   }
 
   /**
@@ -27,17 +17,28 @@ class GeosuggestItem extends React.Component {
     let classes = 'geosuggest-item';
 
     classes += this.props.isActive ? ' geosuggest-item--active' : '';
-    classes += className ? ' ' + className : '';
+    classes += className ? ' ' + className : ''; // eslint-disable-line
 
     return classes;
   }
 
+  /**
+   * When the element gets clicked
+   * @param  {Event} event The click event
+   */
+  handleClick(event) {
+    event.preventDefault();
+    this.props.onSuggestSelect(this.props.suggest);
+  }
+
   renderSaved() {
     return (
-      <li className={this.getSuggestClasses()} onClick={::this.handleClick}>
-        <span className="icon icon-house"></span>
-        <strong>{this.props.suggest.firstname}{'\u0020'}
-        {this.props.suggest.lastname}</strong><br />
+      <li className={this.getSuggestClasses()} onClick={this.handleClick}>
+        <span className="icon icon-house" />
+        <strong>
+          {this.props.suggest.firstname}{'\u0020'}
+          {this.props.suggest.lastname}
+        </strong><br />
         {this.props.suggest.place_name}
         {this.props.suggest.address1}{this.props.suggest.address2 ? ` ${this.props.suggest.address2}` : ''},{'\u0020'}
         {this.props.suggest.city}, {this.props.suggest.state_name}
@@ -47,7 +48,7 @@ class GeosuggestItem extends React.Component {
 
   renderGoogle() {
     return (
-      <li className={this.getSuggestClasses()} onClick={::this.handleClick}>
+      <li className={this.getSuggestClasses()} onClick={this.handleClick}>
         {this.props.suggest.label}
       </li>
     );
@@ -65,9 +66,15 @@ class GeosuggestItem extends React.Component {
 GeosuggestItem.defaultProps = {
   isActive: false,
   suggest: {
-    label: ''
+    label: '',
   },
-  onSuggestSelect: function() {}
+  onSuggestSelect() {},
+};
+
+GeosuggestItem.propTypes = {
+  isActive: React.PropTypes.bool,
+  suggest: React.PropTypes.object,
+  onSuggestSelect: React.PropTypes.func,
 };
 
 export default GeosuggestItem;
