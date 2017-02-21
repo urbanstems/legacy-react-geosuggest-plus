@@ -34,7 +34,8 @@
     "eslint-plugin-react": "^6.10.0",
     "jsdom": "^6.5.1",
     "mocha": "^2.5.3",
-    "react-addons-test-utils": "^15.4.2"
+    "react-addons-test-utils": "^15.4.2",
+    "sinon": "^1.17.7"
   },
   "browserify-global-shim": {
     "react": "React"
