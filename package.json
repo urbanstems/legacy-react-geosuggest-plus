@@ -25,13 +25,15 @@
     "babel-preset-stage-0": "^6.22.0",
     "babel-register": "^6.23.0",
     "chai": "^3.5.0",
+    "enzyme": "^2.7.1",
     "eslint": "^3.16.0",
     "eslint-config-airbnb": "^14.1.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.0",
     "jsdom": "^6.5.1",
-    "mocha": "^2.5.3"
+    "mocha": "^2.5.3",
+    "react-addons-test-utils": "^15.4.2"
   },
   "browserify-global-shim": {
     "react": "React"
@@ -48,5 +50,9 @@
     "google",
     "autosuggest",
     "places"
-  ]
+  ],
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  }
 }
