@@ -1,7 +1,7 @@
 import React from 'react';
 
 const RecentListItem = ({ classes, onClick, suggest }) => (
-  <li className={classes} onClick={onClick}>
+  <li key={suggest} className={classes} onClick={onClick}>
     <span className="icon icon-house" />
     <strong>
       {suggest.firstname}{'\u0020'}
