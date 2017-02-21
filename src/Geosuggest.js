@@ -1,5 +1,6 @@
 import React from 'react'; // eslint-disable-line
 import GeosuggestItem from './GeosuggestItem';
+import RecentListItem from './components/RecentsListItem';
 
 class Geosuggest extends React.Component {
   constructor(...args) {
@@ -259,6 +260,7 @@ class Geosuggest extends React.Component {
           suggest={suggest}
           isActive={isActive}
           onSuggestSelect={this.selectSuggest}
+          recentListItemMarkup={this.props.recentListItemMarkup}
         />
       );
     });
@@ -279,6 +281,7 @@ class Geosuggest extends React.Component {
           suggest={suggest}
           isActive={isActive}
           onSuggestSelect={this.selectSuggest}
+          recentListItemMarkup={this.props.recentListItemMarkup}
         />
       );
     });
@@ -542,6 +545,7 @@ Geosuggest.propTypes = {
   showButton: React.PropTypes.bool,
   buttonMarkup: React.PropTypes.func,
   noSuggestionsMarkup: React.PropTypes.func,
+  recentListItemMarkup: React.PropTypes.func,
 };
 
 Geosuggest.defaultProps = {
@@ -570,7 +574,8 @@ Geosuggest.defaultProps = {
   showButton: false,
   buttonMarkup: () => (<button>Enter</button>),
   noSuggestionsMarkup: () => {},
-  onEmptySuggests: () => {}
+  onEmptySuggests: () => {},
+  recentListItemMarkup: RecentListItem,
 };
 
 export default Geosuggest;

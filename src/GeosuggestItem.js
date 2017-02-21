@@ -32,17 +32,14 @@ class GeosuggestItem extends React.Component {
   }
 
   renderSaved() {
+    const RecentListItem = this.props.recentListItemMarkup;
+
     return (
-      <li className={this.getSuggestClasses()} onClick={this.handleClick}>
-        <span className="icon icon-house" />
-        <strong>
-          {this.props.suggest.firstname}{'\u0020'}
-          {this.props.suggest.lastname}
-        </strong><br />
-        {this.props.suggest.place_name}
-        {this.props.suggest.address1}{this.props.suggest.address2 ? ` ${this.props.suggest.address2}` : ''},{'\u0020'}
-        {this.props.suggest.city}, {this.props.suggest.state_name}
-      </li>
+      <RecentListItem
+        onClick={this.handleClick}
+        suggest={this.props.suggest}
+        classes={this.getSuggestClasses()}
+      />
     );
   }
 
@@ -75,6 +72,7 @@ GeosuggestItem.propTypes = {
   isActive: React.PropTypes.bool,
   suggest: React.PropTypes.object,
   onSuggestSelect: React.PropTypes.func,
+  recentListItemMarkup: React.PropTypes.func.isRequired,
 };
 
 export default GeosuggestItem;
