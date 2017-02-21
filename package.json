@@ -41,6 +41,7 @@
     "react": "React"
   },
   "scripts": {
+    "changelog": "conventional-changelog-generator",
     "lint": "eslint src",
     "pretest": "npm run lint",
     "test": "mocha",
