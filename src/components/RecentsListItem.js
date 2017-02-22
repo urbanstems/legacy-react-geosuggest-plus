@@ -15,8 +15,8 @@ const RecentListItem = ({ classes, onClick, suggest }) => (
 
 RecentListItem.propTypes = {
   classes: React.PropTypes.string,
-  suggest: React.PropTypes.object.isRequired,
   onClick: React.PropTypes.func.isRequired,
+  suggest: React.PropTypes.object.isRequired,
 };
 
 RecentListItem.defaultProps = {
