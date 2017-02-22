@@ -45,41 +45,11 @@ var Geosuggest = require('react-geosuggest-plus');
 
 ### Properties
 
-#### placeholder
-Type: `String`
-Default: `Search places`
-
-The input field will get this placeholder text.
-
-#### initialValue
-Type: `String`
-Default: `''`
-
-An initial value for the input, when you want to prefill the suggest.
-
-#### className
-Type: `String`
-Default: `''`
-
-Add an additional class to the geosuggest container.
-
-#### disabled
+#### autoActivateFirstSuggest
 Type: `Boolean`
 Default: `false`
 
-Defines whether the input is disabled.
-
-#### location
-Type: `google.maps.LatLng`
-Default: `null`
-
-To get localized suggestions, define a location to bias the suggests.
-
-#### radius
-Type: `Number`
-Default: `0`
-
-The radius defines the area around the location to use for biasing the suggests. It must be accompanied by a `location` parameter.
+Automatically activate the first suggestion as you type. If false, the exact term(s) in the input will be used when searching and may return a result not in the list of suggestions.
 
 #### bounds
 Type: [`LatLngBounds`](https://developers.google.com/maps/documentation/javascript/reference?csw=1#LatLngBounds)
@@ -87,17 +57,29 @@ Default: `null`
 
 The bounds to use for biasing the suggests. If this is set, `location` and `radius` are ignored.
 
+#### buttonMarkup
+Type: `Function`
+Default: `() => (<button>Enter</button>)`
+
+The markup used for the submit button. This allows users to provide their own submit button. This is not rendered by default, unless the `showButton` property is set to `true`
+
+#### className
+Type: `String`
+Default: `''`
+
+Add an additional class to the geosuggest container.
+
 #### country
 Type: `String`
 Default: `null`
 
 Restricts predictions to the specified country (ISO 3166-1 Alpha-2 country code, case insensitive). E.g., us, br, au.
 
-#### types
-Type: `Array`
-Default: `null`
+#### disabled
+Type: `Boolean`
+Default: `false`
 
-Restricts the suggestions against the passed in types. If none are specified, all types are used. Consult the Google Docs for [possible types](https://developers.google.com/places/supported_types).
+Defines whether the input is disabled.
 
 #### fixtures
 Type: `Array`
@@ -107,29 +89,77 @@ An array with fixtures (defaults). Each fixture has to be an object with a `labe
 
 You can also add a `className` key to a fixture. This class will be applied to the fixture item.
 
+#### getRecentLabel
+Type: `Function`
+Default: `(suggest) => suggest.zipcode`
+
+This function is used as an accessor for 'fixtures'. Since fixtures do not have a `label` property, this function is used to select the property that will be used instead. The default is the zipcode of the suggestion.
+
+#### getSuggestLabel
+Type: `Function`
+Default: `(suggest) => suggest.description`
+
+Used to generate a custom label for a suggest. Only parameter is a suggest (google.maps.places.AutocompletePrediction). [Check the Google Maps Reference](https://developers.google.com/maps/documentation/javascript/reference#GeocoderResult) for more information on it’s structure.
+
 #### googleMaps
 Type: `Object`
 Default: `google.maps`
 
 In case you want to provide your own Google Maps object, pass it in as googleMaps. The default is the global google maps object.
 
-#### onFocus
-Type: `Function`
-Default: `function() {}`
+#### initialValue
+Type: `String`
+Default: `''`
 
-Gets triggered when the input field receives focus.
+An initial value for the input, when you want to prefill the suggest.
+
+#### location
+Type: `google.maps.LatLng`
+Default: `null`
+
+To get localized suggestions, define a location to bias the suggests.
+
+#### noSuggestionsMarkup
+Type: `Function`
+Default: `() => {}`
+
+A function that returns custom markup to be used when there are no available suggestions.
 
 #### onBlur
 Type: `Function`
-Default: `function() {}`
+Default: `(event) => {}`
 
 Gets triggered when input field loses focus.
 
 #### onChange
 Type: `Function`
-Default: `function(value) {}`
+Default: `(event) => {}`
 
 Gets triggered when input field changes the value
+
+#### onClearClick
+Type: `Function`
+Default: `(event) => {}`
+
+Gets triggered when the user 'clears' the input by pressing the clear button.
+
+#### onClick
+Type: `Function`
+Default: `(event) => {}`
+
+Gets triggered when the user clicks the input or the submit button.
+
+#### onEmptySuggests
+Type: `Function`
+Default: `(event) => {}`
+
+Gets triggered when the user hits the 'enter' button but no suggestions are selected.
+
+#### onFocus
+Type: `Function`
+Default: `function() {}`
+
+Gets triggered when the input field receives focus.
 
 #### onSuggestSelect
 Type: `Function`
@@ -142,23 +172,52 @@ Gets triggered when a suggest got selected. Only parameter is an object with dat
 * `location` – Type `Object` – The location containing `lat` and `lng`
 * `gmaps` – Type `Object` – *Optional!* The complete response when there was a Google Maps geocode necessary (e.g. no location provided for presets). [Check the Google Maps Reference](https://developers.google.com/maps/documentation/javascript/reference#GeocoderResult) for more information on it’s structure.
 
-#### getSuggestLabel
-Type: `Function`
-Default: `function(suggest) { return suggest.description; }`
+#### placeholder
+Type: `String`
+Default: `Search places`
 
-Used to generate a custom label for a suggest. Only parameter is a suggest (google.maps.places.AutocompletePrediction). [Check the Google Maps Reference](https://developers.google.com/maps/documentation/javascript/reference#GeocoderResult) for more information on it’s structure.
+The input field will get this placeholder text.
 
-#### skipSuggest
-Type: `Function`
-Default: `function(suggest) {}`
+#### radius
+Type: `Number`
+Default: `0`
 
-If the function returns true then the suggest will not be included in the displayed results. Only parameter is an object with data of the selected suggest. (See above)
+The radius defines the area around the location to use for biasing the suggests. It must be accompanied by a `location` parameter.
 
-#### autoActivateFirstSuggest
+#### recentListItemMarkup
+Type: `Component | Function`
+Default: `<RecentListItem />`
+
+The component used to display 'fixtures', or 'recents'. This defaults to the internal `<RecentListItem />` component.
+
+Props
+  - classes -- optional classes to pass to the component
+  - onClick -- A function to call when the component is clicked (with the google suggest)
+  - suggest -- The google suggestion
+
+#### recentsLimit
+Type: `Number`
+Default: `5`
+
+The max number of 'fixtures' to render.
+
+#### showButton
 Type: `Boolean`
 Default: `false`
 
-Automatically activate the first suggestion as you type. If false, the exact term(s) in the input will be used when searching and may return a result not in the list of suggestions.
+Whether or not to show the custom submit button.
+
+#### skipSuggest
+Type: `Function`
+Default: `(suggest) => {}`
+
+If the function returns true then the suggest will not be included in the displayed results. Only parameter is an object with data of the selected suggest. (See above)
+
+#### types
+Type: `Array`
+Default: `null`
+
+Restricts the suggestions against the passed in types. If none are specified, all types are used. Consult the Google Docs for [possible types](https://developers.google.com/places/supported_types).
 
 ### Exposed component functions
 
