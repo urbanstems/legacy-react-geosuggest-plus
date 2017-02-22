@@ -1,19 +1,21 @@
-/* global google */
-/* eslint react/jsx-sort-prop-types: 0, react/sort-comp: 0, react/prop-types: 0 */
 import React from 'react';
 import GeosuggestItem from './GeosuggestItem';
+import RecentListItem from './components/RecentsListItem';
+import { K, prop, noop } from './utils';
 
 class Geosuggest extends React.Component {
+  constructor(...args) {
+    super(...args);
 
-  /**
-   * Get the initial state
-   */
-  state = {
-    isSuggestsHidden: true,
-    userInput: this.props.initialValue,
-    activeSuggest: null,
-    suggests: [], // google predictions
-    recents: [] // recent/saved addresses
+    this.state = {
+      isSuggestsHidden: true,
+      userInput: this.props.initialValue,
+      activeSuggest: null,
+      suggests: [], // google predictions
+      recents: [] // recent/saved addresses
+    };
+
+    this.bindInstanceMethods();
   }
 
   /**
@@ -24,18 +26,18 @@ class Geosuggest extends React.Component {
   componentDidMount() {
     this.setInputValue(this.props.initialValue);
 
-    var googleMaps = this.props.googleMaps
-      || google && google.maps || this.googleMaps;
+    const googleMaps = this.props.googleMaps
+      || window.google && window.google.maps || this.googleMaps; // eslint-disable-line
 
     if (!googleMaps) {
-      console.error('Google map api was not found in the page.');
+      console.error('Google map api was not found in the page.'); // eslint-disable-line
     } else {
       this.googleMaps = googleMaps;
     }
 
     this.autocompleteService = new googleMaps.places.AutocompleteService();
     this.geocoder = new googleMaps.Geocoder();
-    this._isMounted = true;
+    this._isMounted = true; // eslint-disable-line
   }
 
   /**
@@ -49,26 +51,16 @@ class Geosuggest extends React.Component {
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  /**
-   * Method used for setting initial value.
-   * @param {string} value to set in input
-   */
-  setInputValue(value) {
-    this.setState({
-      userInput: value
-    });
+    this._isMounted = false; // eslint-disable-line
   }
 
   /**
    * When the input got changed
    */
   onInputChange() {
-    var userInput = this.refs.geosuggestInput.value;
+    const userInput = this.refs.geosuggestInput.value; // eslint-disable-line
 
-    this.setState({ userInput: userInput }, () => {
+    this.setState({ userInput }, () => {
       this.showSuggests();
       this.props.onChange(userInput);
     });
@@ -90,28 +82,287 @@ class Geosuggest extends React.Component {
    * Click the clear button
    */
   onClearClick() {
-    this.clear(() => this.refs.geosuggestInput.focus());
+    this.clear(() => this.refs.geosuggestInput.focus()); // eslint-disable-line
     this.props.onClearClick();
   }
 
   /**
-   * Update the value of the user input
-   * @param {String} value the new value of the user input
+   * When a key gets pressed in the input
+   * @param  {Event} event The keypress event
    */
-  update(value) {
-    this.setState({ userInput: value });
-    this.props.onChange(value);
+  onInputKeyDown(event) {
+    switch (event.which) {
+      case 40: // DOWN
+        event.preventDefault();
+        this.activateSuggest('next');
+        break;
+      case 38: // UP
+        event.preventDefault();
+        this.activateSuggest('prev');
+        break;
+      case 13: // ENTER
+        event.preventDefault();
+        // If activeSuggest is populated
+        // then proceed as expected
+        if (this.state.activeSuggest) {
+          this.selectSuggest(this.state.activeSuggest);
+        } else if (this.state.userInput && this.state.suggests.length) {
+          // If the user has inputted text
+          // AND there are suggestions,
+          // we'll default to the first suggestion
+          this.selectSuggest(this.state.suggests[0]);
+        } else if (this.state.userInput) {
+          // Cascades down to just checking
+          // if the user has entered text
+          // We'll just defer to component `onEmptySuggests`
+          this.props.onEmptySuggests();
+        }
+        break;
+      case 9: // TAB
+        this.selectSuggest(this.state.activeSuggest);
+        break;
+      case 27: // ESC
+        this.hideSuggests();
+        break;
+      default:
+        break;
+    }
   }
 
-  /*
-   * Clear the input and close the suggestion pane
-   * () => this.hideSuggests()
-   *
+  /**
+   * Method used for setting initial value.
+   * @param {string} value to set in input
    */
-  clear(cb = () => {}) {
+  setInputValue(value) {
+    this.setState({ userInput: value });
+  }
+
+  /**
+   * Activate a new suggest
+   * @param {String} direction The direction in which to activate new suggest
+   */
+  activateSuggest(direction) { // eslint-disable-line
+    if (this.state.isSuggestsHidden) {
+      this.showSuggests();
+      return;
+    }
+
+    const suggestsLength = this.state.suggests.length;
+    const recentsLength = this.state.recents.length;
+    const recentsCount = recentsLength > this.props.recentsLimit
+      ? this.props.recentsLimit
+      : recentsLength;
+    const suggestsCount = recentsCount + (suggestsLength - 1);
+    const next = direction === 'next';
+    let newActiveSuggest = null;
+    let newIndex = 0;
+    let i = 0;
+
+    for (i; i <= suggestsCount; i++) { // eslint-disable-line
+      if (
+        this.state.suggests[i] === this.state.activeSuggest ||
+        this.state.recents[i] === this.state.activeSuggest
+      ) {
+        newIndex = next ? i + 1 : i - 1;
+      }
+    }
+
+    if (!this.state.activeSuggest) {
+      newIndex = next ? 0 : suggestsCount;
+    }
+
+    if (newIndex >= 0 && newIndex <= suggestsCount) {
+      // if suggests not full but recents is
+      if (!suggestsLength && recentsCount) {
+        newActiveSuggest = this.state.recents[newIndex];
+      } else if (suggestsLength && recentsCount && newIndex >= suggestsLength) {
+        newActiveSuggest = this.state.recents[newIndex];
+      } else {
+        newActiveSuggest = this.state.suggests[newIndex];
+      }
+    }
+
+    this.setState({ activeSuggest: newActiveSuggest });
+  }
+
+  /**
+   * When an item got selected
+   * @param {GeosuggestItem} suggest The selected suggest item
+   */
+  selectSuggest(suggest = { label: this.state.userInput }) {
     this.setState({
-      userInput: ''
-    }, cb);
+      isSuggestsHidden: true,
+      userInput: suggest.label || suggest.altLabel
+    });
+
+    if (suggest.location) {
+      this.props.onSuggestSelect(suggest);
+      return;
+    }
+
+    this.geocodeSuggest(suggest);
+  }
+
+  /**
+   * Geocode a suggest
+   * @param  {Object} suggest The suggest
+   */
+  geocodeSuggest(suggest) {
+    let searchObject;
+    if (suggest.altLabel) {
+      searchObject = {
+        address: suggest.altLabel
+      };
+    } else if (suggest.placeId) {
+      searchObject = {
+        placeId: suggest.placeId
+      };
+    }
+    this.geocoder.geocode(
+      searchObject,
+      (results, status) => {
+        if (status !== this.googleMaps.GeocoderStatus.OK) {
+          return;
+        }
+
+        const gmaps = results[0];
+        const location = gmaps.geometry.location;
+
+        const newSuggest = Object.assign({}, suggest, {
+          gmaps,
+          location: {
+            lat: location.lat(),
+            lng: location.lng(),
+          },
+        });
+
+        this.props.onSuggestSelect(newSuggest);
+      }
+    );
+  }
+
+  /**
+   * Get the recent/saved items for the list
+   * @return {Array} The recent/saved items
+   */
+  getRecentItems() {
+    return this.state.recents.map((suggest, index) => {
+      const isActive = this.state.activeSuggest &&
+        suggest.placeId === this.state.activeSuggest.placeId;
+
+      // shut off at the recentsLimit
+      if (index >= this.props.recentsLimit) {
+        return null;
+      }
+
+      return (
+        <GeosuggestItem
+          key={suggest.placeId}
+          suggest={suggest}
+          isActive={isActive}
+          onSuggestSelect={this.selectSuggest}
+          recentListItemMarkup={this.props.recentListItemMarkup}
+        />
+      );
+    });
+  }
+
+  /**
+   * Get the suggest items for the list
+   * @return {Array} The suggestions
+   */
+  getSuggestItems() {
+    return this.state.suggests.map((suggest) => {
+      const isActive = this.state.activeSuggest &&
+        suggest.placeId === this.state.activeSuggest.placeId;
+
+      return (// eslint-disable-line no-extra-parens
+        <GeosuggestItem
+          key={suggest.placeId}
+          suggest={suggest}
+          isActive={isActive}
+          onSuggestSelect={this.selectSuggest}
+          recentListItemMarkup={this.props.recentListItemMarkup}
+        />
+      );
+    });
+  }
+
+  /**
+   * The classes for the suggests list
+   * @return {String} The classes
+   */
+  getSuggestsClasses() {
+    let classes = 'geosuggest__suggests';
+
+    classes += this.state.isSuggestsHidden ?
+      ' geosuggest__suggests--hidden' : '';
+
+    return classes;
+  }
+
+  getContainerClasses() {
+    let classes = 'geosuggest-window row';
+
+    classes += this.state.isSuggestsHidden ?
+      ' geosuggest__suggests--hidden hidden' : '';
+
+    return classes;
+  }
+
+  /**
+   * When the input loses focused
+   */
+  hideSuggests() {
+    this.props.onBlur();
+    setTimeout(() => {
+      if (this._isMounted) { // eslint-disable-line
+        this.setState({ isSuggestsHidden: true });
+      }
+    }, 500);
+  }
+
+  /**
+   * When the input gets focused
+   */
+  showSuggests() {
+    this.searchSuggests();
+    this.setState({ isSuggestsHidden: false });
+  }
+
+  /**
+   * Update the suggests
+   * @param  {Object} suggestsGoogle The new google suggests
+   */
+  updateSuggests(suggestsGoogle = []) {
+    const suggests = [];
+    const recents = [];
+    // const regex = new RegExp(this.state.userInput, 'gim');
+    const skipSuggest = this.props.skipSuggest;
+
+    let index = 0;
+    const fixturesLen = this.props.fixtures.length;
+    // const limit = fixturesLen > this.props.recentsLimit ? this.props.recentsLimit : fixturesLen;
+    // ugh i hate for-loops but seems like i have to
+    // utilize it here so i can break out
+    for (; index < fixturesLen; index++) { // eslint-disable-line
+      const recent = this.props.fixtures[index];
+      recent.placeId = recent.id;
+      recent.altLabel = this.props.getRecentLabel(recent);
+      recents.push(recent);
+    }
+
+    suggestsGoogle.forEach((suggest) => {
+      if (!skipSuggest(suggest)) {
+        suggests.push({
+          label: this.props.getSuggestLabel(suggest),
+          placeId: suggest.place_id
+        });
+      }
+    });
+
+    this.setState({ suggests });
+    this.setState({ recents });
   }
 
   /**
@@ -123,7 +374,7 @@ class Geosuggest extends React.Component {
       return;
     }
 
-    var options = {
+    const options = {
       input: this.state.userInput
     };
 
@@ -161,276 +412,53 @@ class Geosuggest extends React.Component {
     );
   }
 
-  /**
-   * Update the suggests
-   * @param  {Object} suggestsGoogle The new google suggests
+  /*
+   * Clear the input and close the suggestion pane
+   * () => this.hideSuggests()
+   *
    */
-  updateSuggests(suggestsGoogle) {
-    if (!suggestsGoogle) {
-      suggestsGoogle = [];
-    }
-
-    let suggests = [];
-    let recents = [];
-    const regex = new RegExp(this.state.userInput, 'gim');
-    const skipSuggest = this.props.skipSuggest;
-
-    let index = 0;
-    let fixturesLen = this.props.fixtures.length;
-    let limit = fixturesLen > this.props.recentsLimit ? this.props.recentsLimit : fixturesLen;
-    // ugh i hate for-loops but seems like i have to
-    // utilize it here so i can break out
-    for (; index < fixturesLen; index++) {
-      let recent = this.props.fixtures[index];
-      recent.placeId = recent.id;
-      recent.altLabel = this.props.getRecentLabel(recent);
-      recents.push(recent);
-    }
-
-    suggestsGoogle.forEach(suggest => {
-      if (!skipSuggest(suggest)) {
-        suggests.push({
-          label: this.props.getSuggestLabel(suggest),
-          placeId: suggest.place_id
-        });
-      }
-    });
-
-    this.setState({ suggests: suggests });
-    this.setState({ recents: recents });
-  }
-
-  /**
-   * When the input gets focused
-   */
-  showSuggests() {
-    this.searchSuggests();
-    this.setState({ isSuggestsHidden: false });
-  }
-
-  /**
-   * When the input loses focused
-   */
-  hideSuggests() {
-    this.props.onBlur();
-    setTimeout(() => {
-      if (this._isMounted) {
-        this.setState({ isSuggestsHidden: true });
-      }
-    }, 500);
-  }
-
-  /**
-   * When a key gets pressed in the input
-   * @param  {Event} event The keypress event
-   */
-  onInputKeyDown(event) {
-    switch (event.which) {
-      case 40: // DOWN
-        event.preventDefault();
-        this.activateSuggest('next');
-        break;
-      case 38: // UP
-        event.preventDefault();
-        this.activateSuggest('prev');
-        break;
-      case 13: // ENTER
-        event.preventDefault();
-        // If activeSuggest is populated
-        // then proceed as expected
-        if (this.state.activeSuggest) {
-          this.selectSuggest(this.state.activeSuggest);
-        }
-        // If the user has inputted text
-        // AND there are suggestions,
-        // we'll default to the first suggestion
-        else if (this.state.userInput && this.state.suggests.length) {
-          this.selectSuggest(this.state.suggests[0]);
-        }
-        // Cascades down to just checking
-        // if the user has entered text
-        // We'll just defer to component `onEmptySuggests`
-        else if (this.state.userInput) {
-          this.props.onEmptySuggests();
-        }
-        break;
-      case 9: // TAB
-        this.selectSuggest(this.state.activeSuggest);
-        break;
-      case 27: // ESC
-        this.hideSuggests();
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
-   * Activate a new suggest
-   * @param {String} direction The direction in which to activate new suggest
-   */
-  activateSuggest(direction) { // eslint-disable-line
-    if (this.state.isSuggestsHidden) {
-      this.showSuggests();
-      return;
-    }
-
-    var suggestsLength = this.state.suggests.length;
-    var recentsLength = this.state.recents.length;
-    var recentsCount = recentsLength > this.props.recentsLimit ? this.props.recentsLimit : recentsLength;
-    var suggestsCount = recentsCount + suggestsLength - 1,
-      next = direction === 'next',
-      newActiveSuggest = null,
-      newIndex = 0,
-      i = 0; // eslint-disable-line id-length
-
-    for (i; i <= suggestsCount; i++) {
-      if (this.state.suggests[i] === this.state.activeSuggest || this.state.recents[i] === this.state.activeSuggest) {
-        newIndex = next ? i + 1 : i - 1;
-      }
-    }
-
-    if (!this.state.activeSuggest) {
-      newIndex = next ? 0 : suggestsCount;
-    }
-
-    if (newIndex >= 0 && newIndex <= suggestsCount) {
-      // if suggests not full but recents is
-      if (!suggestsLength && recentsCount) {
-        newActiveSuggest = this.state.recents[newIndex];
-      } else if (suggestsLength && recentsCount && newIndex >= suggestsLength) {
-        newActiveSuggest = this.state.recents[newIndex];
-      } else {
-        newActiveSuggest = this.state.suggests[newIndex];
-      }
-    }
-
-    this.setState({ activeSuggest: newActiveSuggest });
-  }
-
-  /**
-   * When an item got selected
-   * @param {GeosuggestItem} suggest The selected suggest item
-   */
-  selectSuggest(suggest) {
-    if (!suggest) {
-      suggest = {
-        label: this.state.userInput
-      };
-    }
-
+  clear(cb = () => {}) {
     this.setState({
-      isSuggestsHidden: true,
-      userInput: suggest.label || suggest.altLabel
+      userInput: ''
+    }, cb);
+  }
+
+  /**
+   * Update the value of the user input
+   * @param {String} value the new value of the user input
+   */
+  update(value) {
+    this.setState({ userInput: value });
+    this.props.onChange(value);
+  }
+
+  /**
+   * A helper to run one time when the Component is constructed. This allows
+   * for instance methods to be passed as props without having to bind the
+   * context. This also allows for equality checks to pass when comparing props,
+   * since `foo.bind(bar) !== foo.bind(bar)`
+   */
+  bindInstanceMethods() {
+    const methods = [
+      'setInputValue',
+      'onInputChange',
+      'onFocus',
+      'onClick',
+      'onClearClick',
+      'update',
+      'clear',
+      'searchSuggests',
+      'updateSuggests',
+      'showSuggests',
+      'hideSuggests',
+      'onInputKeyDown',
+      'activateSuggest',
+      'selectSuggest',
+    ];
+
+    methods.forEach((method) => {
+      this[method] = this[method].bind(this);
     });
-
-    if (suggest.location) {
-      this.props.onSuggestSelect(suggest);
-      return;
-    }
-
-    this.geocodeSuggest(suggest);
-  }
-
-  /**
-   * Geocode a suggest
-   * @param  {Object} suggest The suggest
-   */
-  geocodeSuggest(suggest) {
-    let searchObject;
-    if (suggest.altLabel) {
-      searchObject = {
-        address: suggest.altLabel
-      };
-    } else if (suggest.placeId) {
-      searchObject = {
-        placeId: suggest.placeId
-      };
-    }
-    this.geocoder.geocode(
-      searchObject,
-      (results, status) => {
-        if (status !== this.googleMaps.GeocoderStatus.OK) {
-          return;
-        }
-
-        var gmaps = results[0],
-          location = gmaps.geometry.location;
-
-        suggest.gmaps = gmaps;
-        suggest.location = {
-          lat: location.lat(),
-          lng: location.lng()
-        };
-
-        this.props.onSuggestSelect(suggest);
-      }
-    );
-  }
-
-  /**
-   * Get the recent/saved items for the list
-   * @return {Array} The recent/saved items
-   */
-  getRecentItems() {
-    return this.state.recents.map((suggest, index) => {
-      var isActive = this.state.activeSuggest &&
-        suggest.placeId === this.state.activeSuggest.placeId;
-
-      // shut off at the recentsLimit
-      if (index >= this.props.recentsLimit) {
-        return;
-      }
-
-      return (// eslint-disable-line no-extra-parens
-        <GeosuggestItem
-          key={suggest.placeId}
-          suggest={suggest}
-          isActive={isActive}
-          onSuggestSelect={::this.selectSuggest} />
-      );
-    });
-  }
-
-  /**
-   * Get the suggest items for the list
-   * @return {Array} The suggestions
-   */
-  getSuggestItems() {
-    return this.state.suggests.map((suggest, index) => {
-      var isActive = this.state.activeSuggest &&
-        suggest.placeId === this.state.activeSuggest.placeId;
-
-      return (// eslint-disable-line no-extra-parens
-        <GeosuggestItem
-          key={suggest.placeId}
-          suggest={suggest}
-          isActive={isActive}
-          onSuggestSelect={::this.selectSuggest} />
-      );
-    });
-  }
-
-  /**
-   * The classes for the suggests list
-   * @return {String} The classes
-   */
-  getSuggestsClasses() {
-    var classes = 'geosuggest__suggests';
-
-    classes += this.state.isSuggestsHidden ?
-      ' geosuggest__suggests--hidden' : '';
-
-    return classes;
-  }
-
-  getContainerClasses() {
-    var classes = 'geosuggest-window row';
-
-    classes += this.state.isSuggestsHidden ?
-      ' geosuggest__suggests--hidden hidden' : '';
-
-    return classes;
   }
 
   /**
@@ -440,7 +468,7 @@ class Geosuggest extends React.Component {
   render() {
     let suggestionsSection = () => {};
     let recentsSection = () => {};
-    if (!!this.state.suggests.length) {
+    if (this.state.suggests.length) {
       suggestionsSection = () => (
         <div className="geosuggest-suggestions">
           <span className="geosuggest-label allcaps">Suggestions</span>
@@ -453,7 +481,7 @@ class Geosuggest extends React.Component {
       suggestionsSection = this.props.noSuggestionsMarkup;
     }
 
-    if (!!this.state.recents.length) {
+    if (this.state.recents.length) {
       recentsSection = () => (
         <div className="geosuggest-recents">
           <span className="geosuggest-label allcaps">Recent Addresses</span>
@@ -464,21 +492,22 @@ class Geosuggest extends React.Component {
       );
     }
     return (
-      <div className={'geosuggest-container ' + this.props.className}>
+      <div className={`geosuggest-container ${this.props.className}`}>
         <input
           className="geosuggest__input"
-          ref="geosuggestInput"
+          ref="geosuggestInput" // eslint-disable-line
           type="text"
           value={this.state.userInput}
           placeholder={this.props.placeholder}
           disabled={this.props.disabled}
-          onKeyDown={::this.onInputKeyDown}
-          onChange={::this.onInputChange}
-          onFocus={::this.onFocus}
-          onClick={::this.onClick}
-          onBlur={::this.hideSuggests} />
+          onKeyDown={this.onInputKeyDown}
+          onChange={this.onInputChange}
+          onFocus={this.onFocus}
+          onClick={this.onClick}
+          onBlur={this.hideSuggests}
+        />
         {!!this.state.userInput &&
-          <button className="icon icon-close geosuggest-clear" onClick={::this.onClearClick}></button>
+          <button className="icon icon-close geosuggest-clear" onClick={this.onClearClick} />
         }
         <div className={this.getContainerClasses()}>
           {suggestionsSection()}
@@ -493,6 +522,7 @@ class Geosuggest extends React.Component {
 Geosuggest.propTypes = {
   autoActivateFirstSuggest: React.PropTypes.bool,
   bounds: React.PropTypes.any,
+  buttonMarkup: React.PropTypes.func,
   className: React.PropTypes.string,
   country: React.PropTypes.any,
   disabled: React.PropTypes.bool,
@@ -502,48 +532,51 @@ Geosuggest.propTypes = {
   googleMaps: React.PropTypes.any,
   initialValue: React.PropTypes.string,
   location: React.PropTypes.any,
+  noSuggestionsMarkup: React.PropTypes.func,
   onBlur: React.PropTypes.func,
   onChange: React.PropTypes.func,
   onClearClick: React.PropTypes.func,
-  onFocus: React.PropTypes.func,
   onClick: React.PropTypes.func,
+  onEmptySuggests: React.PropTypes.func,
+  onFocus: React.PropTypes.func,
   onSuggestSelect: React.PropTypes.func,
   placeholder: React.PropTypes.string,
   radius: React.PropTypes.any,
-  skipSuggest: React.PropTypes.func,
-  types: React.PropTypes.any,
+  recentListItemMarkup: React.PropTypes.func,
   recentsLimit: React.PropTypes.any,
   showButton: React.PropTypes.bool,
-  buttonMarkup: React.PropTypes.func
+  skipSuggest: React.PropTypes.func,
+  types: React.PropTypes.any,
 };
 
 Geosuggest.defaultProps = {
-  fixtures: [],
-  initialValue: '',
-  placeholder: 'Search places',
-  disabled: false,
-  className: '',
-  location: null,
-  radius: null,
-  bounds: null,
-  country: null,
-  types: null,
-  googleMaps: null,
-  onSuggestSelect: () => {},
-  onFocus: () => {},
-  onBlur: () => {},
-  onClick: () => {},
-  onChange: () => {},
-  onClearClick: () => {},
-  skipSuggest: () => {},
-  getRecentLabel: recent => recent.zipcode,
-  getSuggestLabel: suggest => suggest.description,
   autoActivateFirstSuggest: false,
+  bounds: null,
+  buttonMarkup: K(<button>Enter</button>),
+  className: '',
+  country: null,
+  disabled: false,
+  fixtures: [],
+  getRecentLabel: prop('zipcode'),
+  getSuggestLabel: prop('description'),
+  googleMaps: null,
+  initialValue: '',
+  location: null,
+  noSuggestionsMarkup: noop,
+  onBlur: noop,
+  onChange: noop,
+  onClearClick: noop,
+  onClick: noop,
+  onEmptySuggests: noop,
+  onFocus: noop,
+  onSuggestSelect: noop,
+  placeholder: 'Search places',
+  radius: null,
+  recentListItemMarkup: RecentListItem,
   recentsLimit: 5,
   showButton: false,
-  buttonMarkup: () => (<button>Enter</button>),
-  noSuggestionsMarkup: () => {},
-  onEmptySuggests: () => {}
+  skipSuggest: noop,
+  types: null,
 };
 
 export default Geosuggest;
