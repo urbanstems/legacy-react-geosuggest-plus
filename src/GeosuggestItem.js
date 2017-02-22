@@ -62,17 +62,17 @@ class GeosuggestItem extends React.Component {
 
 GeosuggestItem.defaultProps = {
   isActive: false,
+  onSuggestSelect() {},
   suggest: {
     label: '',
   },
-  onSuggestSelect() {},
 };
 
 GeosuggestItem.propTypes = {
   isActive: React.PropTypes.bool,
-  suggest: React.PropTypes.object,
   onSuggestSelect: React.PropTypes.func,
   recentListItemMarkup: React.PropTypes.func.isRequired,
+  suggest: React.PropTypes.object,
 };
 
 export default GeosuggestItem;
