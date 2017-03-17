@@ -506,7 +506,7 @@ class Geosuggest extends React.Component {
           onClick={this.onClick.bind(this)}
           onBlur={this.hideSuggests.bind(this)}
         />
-        {!!this.state.userInput || this.props.hideClearButton && //eslint-disable-line
+        {!!this.state.userInput || !this.props.hideClearButton && //eslint-disable-line
           <button
             className="icon icon-close geosuggest-clear"
             onClick={this.onClearClick.bind(this)}
