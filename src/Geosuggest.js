@@ -472,13 +472,17 @@ class Geosuggest extends React.Component {
           value={this.state.userInput}
           placeholder={this.props.placeholder}
           disabled={this.props.disabled}
-          onKeyDown={::this.onInputKeyDown}
-          onChange={::this.onInputChange}
-          onFocus={::this.onFocus}
-          onClick={::this.onClick}
-          onBlur={::this.hideSuggests} />
-        {!!this.state.userInput || this.props.hideClearButton &&
-          <button className="icon icon-close geosuggest-clear" onClick={::this.onClearClick}></button>
+          onKeyDown={this.onInputKeyDown.bind(this)}
+          onChange={this.onInputChange.bind(this)}
+          onFocus={this.onFocus.bind(this)}
+          onClick={this.onClick.bind(this)}
+          onBlur={this.hideSuggests.bind(this)}
+        />
+        {!!this.state.userInput || this.props.hideClearButton && //eslint-disable-line
+          <button
+            className="icon icon-close geosuggest-clear"
+            onClick={this.onClearClick.bind(this)}
+          />
         }
         <div className={this.getContainerClasses()}>
           {suggestionsSection()}
