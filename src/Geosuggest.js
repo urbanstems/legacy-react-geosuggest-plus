@@ -560,6 +560,7 @@ Geosuggest.defaultProps = {
   getRecentLabel: prop('zipcode'),
   getSuggestLabel: prop('description'),
   googleMaps: null,
+  hideClearButton: false,
   initialValue: '',
   location: null,
   noSuggestionsMarkup: noop,
