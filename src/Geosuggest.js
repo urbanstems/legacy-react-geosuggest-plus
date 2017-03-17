@@ -477,7 +477,7 @@ class Geosuggest extends React.Component {
           onFocus={::this.onFocus}
           onClick={::this.onClick}
           onBlur={::this.hideSuggests} />
-        {!!this.state.userInput &&
+        {!!this.state.userInput || this.props.hideClearButton &&
           <button className="icon icon-close geosuggest-clear" onClick={::this.onClearClick}></button>
         }
         <div className={this.getContainerClasses()}>
@@ -500,6 +500,7 @@ Geosuggest.propTypes = {
   getRecentLabel: React.PropTypes.func,
   getSuggestLabel: React.PropTypes.func,
   googleMaps: React.PropTypes.any,
+  hideClearButton: React.PropTypes.bool.isRequired,
   initialValue: React.PropTypes.string,
   location: React.PropTypes.any,
   onBlur: React.PropTypes.func,
@@ -529,6 +530,7 @@ Geosuggest.defaultProps = {
   country: null,
   types: null,
   googleMaps: null,
+  hideClearButton: false,
   onSuggestSelect: () => {},
   onFocus: () => {},
   onBlur: () => {},
