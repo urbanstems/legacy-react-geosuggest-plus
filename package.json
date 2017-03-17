@@ -34,12 +34,19 @@
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.0",
     "jsdom": "^6.5.1",
-    "mocha": "^2.3.3"
+    "mocha": "^2.5.3",
+    "react-addons-test-utils": "^15.4.2",
+    "sinon": "^1.17.7"
   },
   "browserify-global-shim": {
     "react": "React"
   },
   "scripts": {
+    "changelog": "conventional-changelog-generator",
+    "lint": "eslint src",
+    "pretest": "npm run lint",
+    "test": "mocha",
+    "test:watch": "npm run test -- --reporter min --watch",
     "prepublish": "make build",
     "postversion": "git push && git push --tags"
   },
@@ -50,5 +57,9 @@
     "google",
     "autosuggest",
     "places"
-  ]
+  ],
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  }
 }

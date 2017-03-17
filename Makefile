@@ -9,7 +9,7 @@ install:
 dist: $(DIST)
 dist/%.js: src/%.js
 	@mkdir -p $(@D)
-	$(BIN)/babel $< -o $@ --stage 0
+	$(BIN)/babel $< -o $@
 
 lint:
 	@ $(BIN)/eslint ./src
@@ -17,7 +17,7 @@ lint:
 test: lint
 	@echo "\nTesting source files, hang on..."
 	@NODE_ENV=test $(BIN)/mocha         \
-		--compilers js:babel/register     \
+		--compilers js:babel-register     \
 		--require test/setup.js
 
 test-build:
