@@ -113,6 +113,12 @@ Default: `google.maps`
 
 In case you want to provide your own Google Maps object, pass it in as googleMaps. The default is the global google maps object.
 
+#### hideClearButton
+Type: `Boolean`
+Default: `false`
+
+Optionally disable the 'clear' button for a more minimal ui.
+
 #### onFocus
 Type: `Function`
 Default: `function() {}`
